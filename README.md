@@ -7,7 +7,7 @@ To use the project, follow these steps:
 
 1. Clone repo:
     ```bash
-    git clone https://github.com/dangmanh18112004/Object-Detection-with-YOLO.git
+    git clone https://github.com/dangmanh18112004/Chatbot-streamlit.git
     ```
 
 2. Install dependencies:
