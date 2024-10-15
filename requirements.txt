@@ -1,0 +1,7 @@
+streamlit==1.26.9
+pymongo
+dnspython
+requests
+beautifulsoup4
+selenium
+pybase64
