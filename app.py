@@ -2,12 +2,10 @@ import streamlit as st
 from utils.authentication import verify_user, register_user
 from utils.chatbot import query_gemini_api
 from utils.flight_prices import get_flight_prices  # Hàm để lấy giá vé máy bay
-import base64
+from utils.analysis import visualization
+from utils.markdown import centered_subheader, centered_title, add_background
 
-def get_base64(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+
 
 # Khởi tạo session state nếu chưa có
 if 'logged_in' not in st.session_state:
@@ -17,32 +15,32 @@ if 'username' not in st.session_state:
 
 # Hàm hiển thị trang đăng nhập
 def login_page():
-    st.subheader("Đăng nhập")
+    centered_subheader("Login")
 
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    if st.button("Đăng nhập"):
+    if st.button("Login"):
         if verify_user(username, password):
             st.session_state.logged_in = True  # Đánh dấu trạng thái đăng nhập thành công
             st.session_state.username = username
-            st.success(f"Đăng nhập thành công!")  # Hiển thị thông báo đăng nhập thành công
+            st.success(f"Login Successfully!")  # Hiển thị thông báo đăng nhập thành công
             st.experimental_rerun()
         else:
-            st.warning('username or password is invalid, please try again!')
+            st.warning('Username or password is invalid, please try again!')
 
 # Hàm hiển thị trang đăng ký
 def register_page():
-    st.subheader("Đăng ký tài khoản")
+    centered_subheader("Account Register")
 
     new_user = st.text_input("Username")
     new_password = st.text_input("Password", type="password")
 
-    if st.button("Đăng ký"):
+    if st.button("Sign Up"):
         if register_user(new_user, new_password):
-            st.success("Đăng ký thành công!")
+            st.success("Register Succesfully!")
         else:
-            st.warning("Tài khoản đã tồn tại!")
+            st.warning("Account is already exists!")
 
 # Hàm hiển thị chatbot sau khi đăng nhập thành công
 def chatbot_page():
@@ -87,7 +85,7 @@ def flight_price_page():
         if departure and destination and flight_date:
             with st.spinner('Đang tra cứu giá vé...'):
                 prices = get_flight_prices(departure, destination, flight_date)  # Gọi API lấy giá vé
-                print(prices)
+                st.write(f"This is prices: {prices}")
                 if prices:
                     st.write(f"Giá vé từ {departure} đến {destination} vào ngày {flight_date}:")
                     st.write(prices)
@@ -95,34 +93,28 @@ def flight_price_page():
                     st.error("Không tìm thấy giá vé!")
         else:
             st.warning("Vui lòng nhập đầy đủ thông tin.")
+            
+st.set_page_config(layout="wide")
 
-# Add background
-img_file = './data/gemini_backgroundv2.png'
-img_base64 = get_base64(img_file)
-page_bg_img = f'''
-<style>
-.stApp {{
-background-image: url("data:image/jpg;base64,{img_base64}");
-background-size: cover;
-}}
-</style>
-'''
-st.markdown(page_bg_img, unsafe_allow_html=True)
-    
+add_background()
+
 # Add logo FPT Edu
 st.image('./data/Logo_FPT_Education.png', width=200)
+
 # Kiểm tra trạng thái để hiển thị page tương ứng
 if st.session_state.logged_in:
     st.sidebar.title("Menu")
-    menu = ["Chatbot", "Tra cứu vé máy bay", "Đăng xuất"]
-    choice = st.sidebar.selectbox("Chọn trang", menu)
+    menu = ["Chatbot", "Tra cứu vé máy bay", "Analysis Student Mental Health", "Exit"]
+    choice = st.sidebar.selectbox("Select Page", menu)
 
     if choice == "Chatbot":
         chatbot_page()  # Hiển thị chatbot
     elif choice == "Tra cứu vé máy bay":
         flight_price_page()  # Hiển thị trang tra cứu giá vé máy bay
-    elif choice == "Đăng xuất":
-        if st.button("Thoát"):
+    elif choice == "Analysis Student Mental Health":
+        visualization()
+    elif choice == "Exit":
+        if st.button("Quit"):
             st.session_state.logged_in = False  # Đặt lại trạng thái đăng nhập
             st.session_state.username = ""
 
@@ -130,11 +122,10 @@ if st.session_state.logged_in:
                 st.session_state['chat_history'] = []
             st.experimental_rerun()
 else:
-    st.sidebar.title("Chatbot Tư Vấn Tâm Lý")
-    menu = ["Đăng Nhập", "Đăng ký"]
-    choice = st.sidebar.selectbox("Chọn chức năng", menu)
-
-    if choice == "Đăng Nhập":
+    st.sidebar.title("Psychological Consulting Chatbot")
+    menu = ["Login", "Sign Up"]
+    choice = st.sidebar.radio("Select Option", menu)
+    if choice == "Login":
         login_page()  # Hiển thị trang đăng nhập
-    elif choice == "Đăng ký":
+    elif choice == "Sign Upq":
         register_page()  # Hiển thị trang đăng ký
